@@ -1,5 +1,4 @@
-
-        package com.krishna.service;
+package com.krishna.service;
 
 import com.krishna.dto.StudentRequest;
 import com.krishna.dto.StudentResponse;
@@ -88,6 +87,21 @@ public class StudentService {
         logger.info("Fetching all students");
 
         return studentRepository.findAll()
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+
+
+    // ==========================================
+    // SEARCH STUDENTS BY NAME
+    // ==========================================
+
+    public List<StudentResponse> searchStudentsByName(String name) {
+
+        logger.info("Searching students by name: {}", name);
+
+        return studentRepository.findByNameContainingIgnoreCase(name)
                 .stream()
                 .map(this::convertToResponse)
                 .toList();
