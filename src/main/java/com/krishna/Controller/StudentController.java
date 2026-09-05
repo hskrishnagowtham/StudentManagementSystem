@@ -39,6 +39,15 @@ public class StudentController {
         );
     }
 
+    // Search students by name
+    @GetMapping("/search")
+    public ResponseEntity<List<StudentResponse>> searchStudents(
+            @RequestParam String name) {
+        return ResponseEntity.ok(
+                studentService.searchStudentsByName(name)
+        );
+    }
+
     // Get student by roll number
     @GetMapping("/{rollNumber}")
     public ResponseEntity<StudentResponse> getStudentById(
