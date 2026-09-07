@@ -2,6 +2,8 @@ package com.krishna.config;
 
 import com.krishna.security.JwtAuthenticationFilter;
 
+import jakarta.servlet.DispatcherType;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -32,22 +34,43 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
-                // Disable CSRF for stateless REST API
+
+                // ============================
+                // CSRF
+                // ============================
+
                 .csrf(csrf -> csrf.disable())
 
-                // Enable CORS
+                // ============================
+                // CORS
+                // ============================
+
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
-                // JWT authentication
+                // ============================
+                // Session
+                // ============================
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
+                // ============================
+                // Authorization
+                // ============================
+
                 .authorizeHttpRequests(auth -> auth
+
+                        // Allow internal forwards used by
+                        // Spring Boot's welcome page
+                        .dispatcherTypeMatchers(
+                                DispatcherType.FORWARD
+                        )
+                        .permitAll()
 
                         // ============================
                         // React frontend
@@ -62,15 +85,15 @@ public class SecurityConfig {
                         .permitAll()
 
                         // ============================
-                        // React Router routes
+                        // React Router pages
                         // ============================
 
                         .requestMatchers(
                                 "/login",
                                 "/register",
+                                "/dashboard",
                                 "/students",
-                                "/students/**",
-                                "/dashboard"
+                                "/students/**"
                         )
                         .permitAll()
 
@@ -88,7 +111,9 @@ public class SecurityConfig {
                         // Authentication APIs
                         // ============================
 
-                        .requestMatchers("/auth/**")
+                        .requestMatchers(
+                                "/auth/**"
+                        )
                         .permitAll()
 
                         // ============================
@@ -103,14 +128,17 @@ public class SecurityConfig {
                         .permitAll()
 
                         // ============================
-                        // Everything else
+                        // All other requests
                         // ============================
 
                         .anyRequest()
                         .authenticated()
                 )
 
-                // JWT filter
+                // ============================
+                // JWT Filter
+                // ============================
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -118,6 +146,10 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    // ==========================================
+    // CORS CONFIGURATION
+    // ==========================================
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
