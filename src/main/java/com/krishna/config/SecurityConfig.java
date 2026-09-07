@@ -31,12 +31,15 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
+                // Disable CSRF because this is a stateless REST API
                 .csrf(csrf -> csrf.disable())
 
+                // Enable CORS
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
+                // JWT-based authentication
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
@@ -45,7 +48,14 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Login and register
+                        // CORS preflight MUST be allowed
+                        .requestMatchers(
+                                HttpMethod.OPTIONS,
+                                "/**"
+                        )
+                        .permitAll()
+
+                        // Authentication endpoints
                         .requestMatchers("/auth/**")
                         .permitAll()
 
@@ -57,14 +67,7 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // CORS preflight
-                        .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
-                        )
-                        .permitAll()
-
-                        // Student APIs require JWT
+                        // All other endpoints require JWT
                         .anyRequest()
                         .authenticated()
                 )
