@@ -1,12 +1,13 @@
-FROM eclipse-temurin:24-jdk
+FROM maven:3.9-eclipse-temurin-24
 
 WORKDIR /app
 
-COPY . .
+COPY pom.xml .
 
-RUN chmod +x mvnw
-RUN ./mvnw clean package -DskipTests
+COPY src ./src
+
+RUN mvn clean package -DskipTests
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "java -jar target/*.jar"]
+CMD ["java", "-jar", "target/StudentManagementSystem-0.0.1-SNAPSHOT.jar"]
