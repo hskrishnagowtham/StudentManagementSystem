@@ -9,9 +9,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -34,11 +36,6 @@ public class SecurityConfig {
                 // Disable CSRF because this is a stateless REST API
                 .csrf(csrf -> csrf.disable())
 
-                // Enable CORS
-                .cors(cors -> cors.configurationSource(
-                        corsConfigurationSource()
-                ))
-
                 // JWT-based authentication
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -48,14 +45,14 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // CORS preflight MUST be allowed
+                        // CORS preflight
                         .requestMatchers(
                                 HttpMethod.OPTIONS,
                                 "/**"
                         )
                         .permitAll()
 
-                        // Authentication endpoints
+                        // Login and registration
                         .requestMatchers("/auth/**")
                         .permitAll()
 
@@ -67,9 +64,16 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // All other endpoints require JWT
+                        // Everything else requires JWT
                         .anyRequest()
                         .authenticated()
+                )
+
+                // IMPORTANT:
+                // Process CORS before JWT/security filters
+                .addFilterBefore(
+                        new CorsFilter(corsConfigurationSource()),
+                        JwtAuthenticationFilter.class
                 )
 
                 .addFilterBefore(
