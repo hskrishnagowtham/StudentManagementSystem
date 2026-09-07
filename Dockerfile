@@ -10,4 +10,4 @@ RUN mvn clean package -DskipTests
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "target/StudentManagementSystem-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-Xms128m", "-Xmx384m", "-XX:MaxMetaspaceSize=128m", "-jar", "target/StudentManagementSystem-0.0.1-SNAPSHOT.jar"]
