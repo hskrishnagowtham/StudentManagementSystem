@@ -32,13 +32,15 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
+                // Disable CSRF for stateless REST API
                 .csrf(csrf -> csrf.disable())
 
-                // Use Spring Security's built-in CORS support
+                // Enable CORS
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
+                // JWT authentication
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
@@ -47,18 +49,52 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Allow browser CORS preflight requests
+                        // ============================
+                        // React frontend
+                        // ============================
+
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/assets/**",
+                                "/favicon.ico"
+                        )
+                        .permitAll()
+
+                        // ============================
+                        // React Router routes
+                        // ============================
+
+                        .requestMatchers(
+                                "/login",
+                                "/register",
+                                "/students",
+                                "/students/**",
+                                "/dashboard"
+                        )
+                        .permitAll()
+
+                        // ============================
+                        // CORS preflight
+                        // ============================
+
                         .requestMatchers(
                                 HttpMethod.OPTIONS,
                                 "/**"
                         )
                         .permitAll()
 
-                        // Login and registration
+                        // ============================
+                        // Authentication APIs
+                        // ============================
+
                         .requestMatchers("/auth/**")
                         .permitAll()
 
+                        // ============================
                         // Swagger
+                        // ============================
+
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -66,11 +102,15 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // Student APIs require JWT
+                        // ============================
+                        // Everything else
+                        // ============================
+
                         .anyRequest()
                         .authenticated()
                 )
 
+                // JWT filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
