@@ -66,7 +66,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // Allow internal forwards used by
-                        // Spring Boot's welcome page
+                        // React/Spring Boot
                         .dispatcherTypeMatchers(
                                 DispatcherType.FORWARD
                         )
@@ -80,12 +80,13 @@ public class SecurityConfig {
                                 "/",
                                 "/index.html",
                                 "/assets/**",
-                                "/favicon.ico"
+                                "/favicon.ico",
+                                "/favicon.svg"
                         )
                         .permitAll()
 
                         // ============================
-                        // React Router pages
+                        // React routes
                         // ============================
 
                         .requestMatchers(
