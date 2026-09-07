@@ -1,4 +1,5 @@
-package com.krishna.config;
+
+        package com.krishna.config;
 
 import com.krishna.security.JwtAuthenticationFilter;
 
@@ -34,48 +35,30 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
-
-                // ============================
-                // CSRF
-                // ============================
-
+                // Disable CSRF because this application uses JWT authentication
                 .csrf(csrf -> csrf.disable())
 
-                // ============================
-                // CORS
-                // ============================
-
+                // Enable CORS
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
-                // ============================
-                // Session
-                // ============================
-
+                // Stateless authentication using JWT
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
-                // ============================
-                // Authorization
-                // ============================
-
                 .authorizeHttpRequests(auth -> auth
 
-                        // Allow internal forwards used by
-                        // React/Spring Boot
+                        // Allow React forwarding
                         .dispatcherTypeMatchers(
                                 DispatcherType.FORWARD
                         )
                         .permitAll()
 
-                        // ============================
-                        // React frontend
-                        // ============================
-
+                        // Allow frontend static files
                         .requestMatchers(
                                 "/",
                                 "/index.html",
@@ -85,42 +68,35 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // ============================
-                        // React routes
-                        // ============================
-
+                        // Allow React routes
                         .requestMatchers(
                                 "/login",
                                 "/register",
-                                "/dashboard",
+                                "/dashboard"
+                        )
+                        .permitAll()
+
+                        // Allow authentication endpoints
+                        .requestMatchers(
+                                "/auth/**"
+                        )
+                        .permitAll()
+
+                        // Allow student APIs
+                        .requestMatchers(
                                 "/students",
                                 "/students/**"
                         )
                         .permitAll()
 
-                        // ============================
-                        // CORS preflight
-                        // ============================
-
+                        // Allow CORS preflight requests
                         .requestMatchers(
                                 HttpMethod.OPTIONS,
                                 "/**"
                         )
                         .permitAll()
 
-                        // ============================
-                        // Authentication APIs
-                        // ============================
-
-                        .requestMatchers(
-                                "/auth/**"
-                        )
-                        .permitAll()
-
-                        // ============================
                         // Swagger
-                        // ============================
-
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -128,18 +104,12 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // ============================
-                        // All other requests
-                        // ============================
-
+                        // Everything else requires authentication
                         .anyRequest()
                         .authenticated()
                 )
 
-                // ============================
-                // JWT Filter
-                // ============================
-
+                // JWT filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -147,10 +117,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-    // ==========================================
-    // CORS CONFIGURATION
-    // ==========================================
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -160,8 +126,14 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(
                 List.of(
+                        // Local React frontend
                         "http://localhost:5173",
-                        "https://student-management-frontend-5nti.onrender.com"
+
+                        // Old Render frontend
+                        "https://student-management-frontend-5nti.onrender.com",
+
+                        // New combined Render application
+                        "https://studentmanagementsystem-0xvp.onrender.com"
                 )
         );
 
