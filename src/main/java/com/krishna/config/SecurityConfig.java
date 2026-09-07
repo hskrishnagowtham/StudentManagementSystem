@@ -13,7 +13,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -33,10 +32,13 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
-                // Disable CSRF because this is a stateless REST API
                 .csrf(csrf -> csrf.disable())
 
-                // JWT-based authentication
+                // Use Spring Security's built-in CORS support
+                .cors(cors -> cors.configurationSource(
+                        corsConfigurationSource()
+                ))
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
@@ -45,7 +47,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // CORS preflight
+                        // Allow browser CORS preflight requests
                         .requestMatchers(
                                 HttpMethod.OPTIONS,
                                 "/**"
@@ -64,16 +66,9 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // Everything else requires JWT
+                        // Student APIs require JWT
                         .anyRequest()
                         .authenticated()
-                )
-
-                // IMPORTANT:
-                // Process CORS before JWT/security filters
-                .addFilterBefore(
-                        new CorsFilter(corsConfigurationSource()),
-                        JwtAuthenticationFilter.class
                 )
 
                 .addFilterBefore(
