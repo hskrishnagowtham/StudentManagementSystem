@@ -10,8 +10,7 @@ public class WebController {
             "/",
             "/login",
             "/register",
-            "/dashboard",
-            "/students"
+            "/dashboard"
     })
     public String index() {
         return "forward:/index.html";

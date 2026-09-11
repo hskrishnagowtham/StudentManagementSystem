@@ -13,12 +13,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 @Component
-public class JwtAuthenticationFilter
-        extends org.springframework.web.filter.OncePerRequestFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -32,30 +32,28 @@ public class JwtAuthenticationFilter
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-
-        String path = request.getRequestURI();
-
-        // Do not run JWT authentication for public endpoints
-        return path.equals("/auth/register")
-                || path.equals("/auth/login")
-                || path.startsWith("/students")
-                || path.equals("/")
-                || path.equals("/index.html")
-                || path.startsWith("/assets/")
-                || path.equals("/favicon.ico")
-                || path.equals("/favicon.svg")
-                || path.equals("/login")
-                || path.equals("/register")
-                || path.equals("/dashboard");
-    }
-
-    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
+
+        String requestURI = request.getRequestURI();
+
+        // ==========================================
+        // TEMPORARILY SKIP JWT FOR STUDENT APIs
+        // ==========================================
+
+        if (requestURI.equals("/students")
+                || requestURI.startsWith("/students/")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // ==========================================
+        // GET AUTHORIZATION HEADER
+        // ==========================================
 
         String authHeader =
                 request.getHeader("Authorization");
@@ -63,9 +61,8 @@ public class JwtAuthenticationFilter
         String username = null;
         String jwt = null;
 
-        // Check Authorization header
-        if (authHeader != null &&
-                authHeader.startsWith("Bearer ")) {
+        if (authHeader != null
+                && authHeader.startsWith("Bearer ")) {
 
             jwt = authHeader.substring(7);
 
@@ -83,11 +80,14 @@ public class JwtAuthenticationFilter
             }
         }
 
-        // Authenticate user if JWT exists
-        if (username != null &&
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication() == null) {
+        // ==========================================
+        // AUTHENTICATE USER
+        // ==========================================
+
+        if (username != null
+                && SecurityContextHolder
+                .getContext()
+                .getAuthentication() == null) {
 
             try {
 
@@ -122,12 +122,6 @@ public class JwtAuthenticationFilter
                             "JWT authentication successful for: "
                                     + username
                     );
-
-                } else {
-
-                    System.out.println(
-                            "JWT token is invalid"
-                    );
                 }
 
             } catch (Exception e) {
@@ -138,6 +132,10 @@ public class JwtAuthenticationFilter
                 );
             }
         }
+
+        // ==========================================
+        // CONTINUE REQUEST
+        // ==========================================
 
         filterChain.doFilter(request, response);
     }
