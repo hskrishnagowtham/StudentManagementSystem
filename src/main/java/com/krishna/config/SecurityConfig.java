@@ -1,5 +1,4 @@
-
-        package com.krishna.config;
+package com.krishna.config;
 
 import com.krishna.security.JwtAuthenticationFilter;
 
@@ -35,15 +34,12 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
-                // Disable CSRF because this application uses JWT authentication
                 .csrf(csrf -> csrf.disable())
 
-                // Enable CORS
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
-                // Stateless authentication using JWT
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
@@ -52,51 +48,62 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Allow React forwarding
-                        .dispatcherTypeMatchers(
-                                DispatcherType.FORWARD
-                        )
-                        .permitAll()
+                        // ============================
+                        // OPTIONS / CORS
+                        // ============================
 
-                        // Allow frontend static files
-                        .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/assets/**",
-                                "/favicon.ico",
-                                "/favicon.svg"
-                        )
-                        .permitAll()
-
-                        // Allow React routes
-                        .requestMatchers(
-                                "/login",
-                                "/register",
-                                "/dashboard"
-                        )
-                        .permitAll()
-
-                        // Allow authentication endpoints
-                        .requestMatchers(
-                                "/auth/**"
-                        )
-                        .permitAll()
-
-                        // Allow student APIs
-                        .requestMatchers(
-                                "/students",
-                                "/students/**"
-                        )
-                        .permitAll()
-
-                        // Allow CORS preflight requests
                         .requestMatchers(
                                 HttpMethod.OPTIONS,
                                 "/**"
                         )
                         .permitAll()
 
-                        // Swagger
+                        // ============================
+                        // AUTHENTICATION
+                        // ============================
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/register",
+                                "/auth/login"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                "/auth/**"
+                        )
+                        .permitAll()
+
+                        // ============================
+                        // FRONTEND
+                        // ============================
+
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/favicon.ico",
+                                "/favicon.svg",
+                                "/assets/**",
+                                "/login",
+                                "/register",
+                                "/dashboard"
+                        )
+                        .permitAll()
+
+                        // ============================
+                        // STUDENT API
+                        // ============================
+
+                        .requestMatchers(
+                                "/students",
+                                "/students/**"
+                        )
+                        .permitAll()
+
+                        // ============================
+                        // SWAGGER
+                        // ============================
+
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -104,12 +111,23 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // Everything else requires authentication
+                        // ============================
+                        // FORWARD
+                        // ============================
+
+                        .dispatcherTypeMatchers(
+                                DispatcherType.FORWARD
+                        )
+                        .permitAll()
+
+                        // ============================
+                        // EVERYTHING ELSE
+                        // ============================
+
                         .anyRequest()
                         .authenticated()
                 )
 
-                // JWT filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -117,6 +135,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -126,13 +145,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(
                 List.of(
-                        // Local React frontend
                         "http://localhost:5173",
-
-                        // Old Render frontend
                         "https://student-management-frontend-5nti.onrender.com",
-
-                        // New combined Render application
                         "https://studentmanagementsystem-0xvp.onrender.com"
                 )
         );
