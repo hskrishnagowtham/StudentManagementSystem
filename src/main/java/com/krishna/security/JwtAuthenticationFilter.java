@@ -32,6 +32,25 @@ public class JwtAuthenticationFilter
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+        String path = request.getRequestURI();
+
+        // Do not run JWT authentication for public endpoints
+        return path.equals("/auth/register")
+                || path.equals("/auth/login")
+                || path.startsWith("/students")
+                || path.equals("/")
+                || path.equals("/index.html")
+                || path.startsWith("/assets/")
+                || path.equals("/favicon.ico")
+                || path.equals("/favicon.svg")
+                || path.equals("/login")
+                || path.equals("/register")
+                || path.equals("/dashboard");
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -44,10 +63,7 @@ public class JwtAuthenticationFilter
         String username = null;
         String jwt = null;
 
-        // ============================
         // Check Authorization header
-        // ============================
-
         if (authHeader != null &&
                 authHeader.startsWith("Bearer ")) {
 
@@ -67,10 +83,7 @@ public class JwtAuthenticationFilter
             }
         }
 
-        // ============================
-        // Authenticate user
-        // ============================
-
+        // Authenticate user if JWT exists
         if (username != null &&
                 SecurityContextHolder
                         .getContext()
@@ -126,25 +139,6 @@ public class JwtAuthenticationFilter
             }
         }
 
-        // ============================
-        // Debug information
-        // ============================
-
-        System.out.println(
-                "Request: "
-                        + request.getMethod()
-                        + " "
-                        + request.getRequestURI()
-        );
-
-        System.out.println(
-                "Authenticated user: "
-                        + SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-        );
-
-        // Continue request
         filterChain.doFilter(request, response);
     }
 }
