@@ -23,9 +23,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter) {
-
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -48,36 +46,18 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // ============================
-                        // OPTIONS / CORS
-                        // ============================
-
+                        // OPTIONS
                         .requestMatchers(
                                 HttpMethod.OPTIONS,
                                 "/**"
-                        )
-                        .permitAll()
+                        ).permitAll()
 
-                        // ============================
-                        // AUTHENTICATION
-                        // ============================
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/auth/register",
-                                "/auth/login"
-                        )
-                        .permitAll()
-
+                        // AUTH
                         .requestMatchers(
                                 "/auth/**"
-                        )
-                        .permitAll()
+                        ).permitAll()
 
-                        // ============================
                         // FRONTEND
-                        // ============================
-
                         .requestMatchers(
                                 "/",
                                 "/index.html",
@@ -87,45 +67,28 @@ public class SecurityConfig {
                                 "/login",
                                 "/register",
                                 "/dashboard"
-                        )
-                        .permitAll()
+                        ).permitAll()
 
-                        // ============================
-                        // STUDENT API
-                        // ============================
-
+                        // STUDENTS
                         .requestMatchers(
                                 "/students",
                                 "/students/**"
-                        )
-                        .permitAll()
+                        ).permitAll()
 
-                        // ============================
                         // SWAGGER
-                        // ============================
-
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
-                        )
-                        .permitAll()
+                        ).permitAll()
 
-                        // ============================
                         // FORWARD
-                        // ============================
-
                         .dispatcherTypeMatchers(
                                 DispatcherType.FORWARD
-                        )
-                        .permitAll()
+                        ).permitAll()
 
-                        // ============================
                         // EVERYTHING ELSE
-                        // ============================
-
-                        .anyRequest()
-                        .authenticated()
+                        .anyRequest().authenticated()
                 )
 
                 .addFilterBefore(
@@ -135,7 +98,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
