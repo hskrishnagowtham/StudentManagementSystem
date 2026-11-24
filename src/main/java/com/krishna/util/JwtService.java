@@ -16,7 +16,7 @@ import java.util.function.Function;
 public class JwtService {
 
     private static final String SECRET_KEY =
-            "MySecretKeyForStudentManagementSystem123456789";
+            System.getenv("JWT_SECRET");
 
     private final SecretKey key =
             Keys.hmacShaKeyFor(

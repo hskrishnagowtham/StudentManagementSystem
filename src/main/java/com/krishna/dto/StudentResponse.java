@@ -1,3 +1,4 @@
+
 package com.krishna.dto;
 
 public class StudentResponse {
@@ -7,16 +8,17 @@ public class StudentResponse {
     private int year;
     private int semester;
     private String course;
-    private int totalMarks;
-    private double percentage;
+    private Integer totalMarks;
+    private Integer maximumMarks;
+    private Double percentage;
     private String grade;
 
     public StudentResponse() {
     }
 
     public StudentResponse(int rollNumber, String name, int year,
-                           int semester, String course, int totalMarks,
-                           double percentage, String grade) {
+                           int semester, String course, Integer totalMarks,
+                           Integer maximumMarks, Double percentage, String grade) {
 
         this.rollNumber = rollNumber;
         this.name = name;
@@ -24,6 +26,7 @@ public class StudentResponse {
         this.semester = semester;
         this.course = course;
         this.totalMarks = totalMarks;
+        this.maximumMarks = maximumMarks;
         this.percentage = percentage;
         this.grade = grade;
     }
@@ -68,19 +71,27 @@ public class StudentResponse {
         this.course = course;
     }
 
-    public int getTotalMarks() {
+    public Integer getTotalMarks() {
         return totalMarks;
     }
 
-    public void setTotalMarks(int totalMarks) {
+    public void setTotalMarks(Integer totalMarks) {
         this.totalMarks = totalMarks;
     }
 
-    public double getPercentage() {
+    public Integer getMaximumMarks() {
+        return maximumMarks;
+    }
+
+    public void setMaximumMarks(Integer maximumMarks) {
+        this.maximumMarks = maximumMarks;
+    }
+
+    public Double getPercentage() {
         return percentage;
     }
 
-    public void setPercentage(double percentage) {
+    public void setPercentage(Double percentage) {
         this.percentage = percentage;
     }
 

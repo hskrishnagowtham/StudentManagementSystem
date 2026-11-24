@@ -1,8 +1,12 @@
+
 package com.krishna.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class Student {
@@ -22,20 +26,25 @@ public class Student {
     @Column(nullable = false, length = 100)
     private String course;
 
-    @Column(nullable = false)
-    private int totalMarks;
+    @Column(nullable = true)
+    private Integer totalMarks;
 
-    @Column(nullable = false)
-    private double percentage;
+    @Column(nullable = true)
+    private Integer maximumMarks;
 
-    @Column(nullable = false, length = 5)
+    @Column(nullable = true)
+    private Double percentage;
+
+    @Column(nullable = true, length = 5)
     private String grade;
 
-    // No-argument constructor
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
     public Student() {
     }
 
-    // Parameterized constructor
     public Student(int rollNumber, String name, int year, int semester,
                    String course, int totalMarks,
                    double percentage, String grade) {
@@ -90,19 +99,27 @@ public class Student {
         this.course = course;
     }
 
-    public int getTotalMarks() {
+    public Integer getTotalMarks() {
         return totalMarks;
     }
 
-    public void setTotalMarks(int totalMarks) {
+    public void setTotalMarks(Integer totalMarks) {
         this.totalMarks = totalMarks;
     }
 
-    public double getPercentage() {
+    public Integer getMaximumMarks() {
+        return maximumMarks;
+    }
+
+    public void setMaximumMarks(Integer maximumMarks) {
+        this.maximumMarks = maximumMarks;
+    }
+
+    public Double getPercentage() {
         return percentage;
     }
 
-    public void setPercentage(double percentage) {
+    public void setPercentage(Double percentage) {
         this.percentage = percentage;
     }
 
@@ -112,5 +129,13 @@ public class Student {
 
     public void setGrade(String grade) {
         this.grade = grade;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

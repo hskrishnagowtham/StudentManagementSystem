@@ -1,3 +1,4 @@
+
 package com.krishna.security;
 
 import com.krishna.util.JwtService;
@@ -38,69 +39,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String requestURI = request.getRequestURI();
-
-        // ==========================================
-        // TEMPORARILY SKIP JWT FOR STUDENT APIs
-        // ==========================================
-
-        if (requestURI.equals("/students")
-                || requestURI.startsWith("/students/")) {
-
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // ==========================================
-        // GET AUTHORIZATION HEADER
-        // ==========================================
-
-        String authHeader =
-                request.getHeader("Authorization");
+        // Get Authorization header
+        String authHeader = request.getHeader("Authorization");
 
         String username = null;
         String jwt = null;
 
-        if (authHeader != null
-                && authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
             jwt = authHeader.substring(7);
 
             try {
-
-                username =
-                        jwtService.extractUsername(jwt);
+                username = jwtService.extractUsername(jwt);
 
             } catch (Exception e) {
-
-                System.out.println(
-                        "JWT extraction failed: "
-                                + e.getMessage()
-                );
+                System.out.println("JWT extraction failed: " + e.getMessage());
             }
         }
 
-        // ==========================================
-        // AUTHENTICATE USER
-        // ==========================================
-
+        // Authenticate user
         if (username != null
-                && SecurityContextHolder
-                .getContext()
-                .getAuthentication() == null) {
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             try {
-
                 UserDetails userDetails =
-                        userDetailsService
-                                .loadUserByUsername(username);
+                        userDetailsService.loadUserByUsername(username);
 
-                if (jwtService.isTokenValid(
-                        jwt,
-                        userDetails)) {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
 
-                    UsernamePasswordAuthenticationToken
-                            authenticationToken =
+                    UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
                                     null,
@@ -112,31 +79,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     .buildDetails(request)
                     );
 
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(
-                                    authenticationToken
-                            );
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authenticationToken);
 
                     System.out.println(
-                            "JWT authentication successful for: "
-                                    + username
+                            "JWT authentication successful for: " + username
                     );
                 }
 
             } catch (Exception e) {
-
-                System.out.println(
-                        "JWT authentication failed: "
-                                + e.getMessage()
-                );
+                System.out.println("JWT authentication failed: " + e.getMessage());
             }
         }
 
-        // ==========================================
-        // CONTINUE REQUEST
-        // ==========================================
-
+        // Continue request
         filterChain.doFilter(request, response);
     }
 }

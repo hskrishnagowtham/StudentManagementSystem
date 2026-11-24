@@ -26,6 +26,8 @@ public class StudentRequest {
     @Min(value = 0, message = "Total marks cannot be negative")
     private int totalMarks;
 
+    @Min(value = 1, message = "Maximum marks must be at least 1")
+    private int maximumMarks;
 
     // No-argument constructor
     public StudentRequest() {
@@ -35,7 +37,7 @@ public class StudentRequest {
     // Parameterized constructor
     public StudentRequest(int rollNumber, String name, int year,
                           int semester, String course,
-                          int totalMarks) {
+                          int totalMarks, int maximumMarks) {
 
         this.rollNumber = rollNumber;
         this.name = name;
@@ -43,6 +45,7 @@ public class StudentRequest {
         this.semester = semester;
         this.course = course;
         this.totalMarks = totalMarks;
+        this.maximumMarks = maximumMarks;
     }
 
 
@@ -90,6 +93,14 @@ public class StudentRequest {
 
     public int getTotalMarks() {
         return totalMarks;
+    }
+
+    public int getMaximumMarks() {
+        return maximumMarks;
+    }
+
+    public void setMaximumMarks(int maximumMarks) {
+        this.maximumMarks = maximumMarks;
     }
 
     public void setTotalMarks(int totalMarks) {

@@ -1,8 +1,10 @@
+
 package com.krishna.service;
 
 import com.krishna.entity.User;
 import com.krishna.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -10,9 +12,14 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
+
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Register a new user
@@ -37,5 +44,18 @@ public class UserService {
     // Find user by ID
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
+    }
+
+    // Reset existing ADMIN password
+    public void resetAdminPassword(String newPassword) {
+
+        User admin = userRepository.findByUsername("admin")
+                .orElseThrow(() ->
+                        new RuntimeException("Admin account not found"));
+
+        admin.setPassword(passwordEncoder.encode(newPassword));
+        admin.setRole("ADMIN");
+
+        userRepository.save(admin);
     }
 }

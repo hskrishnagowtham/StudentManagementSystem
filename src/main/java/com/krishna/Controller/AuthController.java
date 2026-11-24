@@ -1,11 +1,16 @@
-package com.krishna.controller;
+
+package com.krishna.Controller;
 
 import com.krishna.dto.LoginRequest;
 import com.krishna.dto.LoginResponse;
 import com.krishna.dto.RegisterRequest;
+
 import com.krishna.entity.User;
+import com.krishna.service.RegistrationService;
 import com.krishna.service.UserService;
 import com.krishna.util.JwtService;
+
+import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,117 +22,79 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
+    private final RegistrationService registrationService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
     public AuthController(
             UserService userService,
+            RegistrationService registrationService,
             JwtService jwtService,
             PasswordEncoder passwordEncoder) {
 
         this.userService = userService;
+        this.registrationService = registrationService;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ============================
     // REGISTER
-    // ============================
-
     @PostMapping("/register")
     public ResponseEntity<?> register(
-            @RequestBody RegisterRequest request) {
+            @Valid @RequestBody RegisterRequest request) {
 
-        if (userService.findByUsername(
-                request.getUsername()) != null) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body("Username already exists");
-        }
-
-        User user = new User();
-
-        user.setUsername(request.getUsername());
-
-        // Encrypt password
-        user.setPassword(
-                passwordEncoder.encode(
-                        request.getPassword()
-                )
-        );
-
-        user.setRole(request.getRole());
-
-        userService.register(user);
+        registrationService.registerStudent(request);
 
         return ResponseEntity.ok(
-                "User registered successfully: "
-                        + request.getUsername()
+                "Student registered successfully: " + request.getUsername()
         );
     }
 
-    // ============================
     // LOGIN
-    // ============================
-
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
-            @RequestBody LoginRequest request) {
+            @Valid @RequestBody LoginRequest request) {
+        {
 
-        User user = userService.findByUsername(
-                request.getUsername()
-        );
+            User user = userService.findByUsername(request.getUsername());
 
-        // User doesn't exist
-        if (user == null) {
+            if (user == null) {
+                return ResponseEntity.status(401).body(
+                        new LoginResponse(
+                                "Invalid username or password",
+                                null, null, null
+                        )
+                );
+            }
 
-            return ResponseEntity
-                    .status(401)
-                    .body(
-                            new LoginResponse(
-                                    "Invalid username or password",
-                                    null,
-                                    null
-                            )
-                    );
+            if (!passwordEncoder.matches(
+                    request.getPassword(), user.getPassword())) {
+
+                return ResponseEntity.status(401).body(
+                        new LoginResponse(
+                                "Invalid username or password",
+                                null, null, null
+                        )
+                );
+            }
+
+            UserDetails userDetails =
+                    org.springframework.security.core.userdetails.User
+                            .withUsername(user.getUsername())
+                            .password(user.getPassword())
+                            .roles(user.getRole())
+                            .build();
+
+            String token = jwtService.generateToken(userDetails);
+
+            return ResponseEntity.ok(
+                    new LoginResponse(
+                            "Login successful",
+                            user.getUsername(),
+                            token,
+                            user.getRole()
+                    )
+            );
         }
-
-        // Check password
-        if (!passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword())) {
-
-            return ResponseEntity
-                    .status(401)
-                    .body(
-                            new LoginResponse(
-                                    "Invalid username or password",
-                                    null,
-                                    null
-                            )
-                    );
-        }
-
-        // Create UserDetails
-        UserDetails userDetails =
-                org.springframework.security.core.userdetails.User
-                        .withUsername(user.getUsername())
-                        .password(user.getPassword())
-                        .roles(user.getRole())
-                        .build();
-
-        // Generate JWT
-        String token =
-                jwtService.generateToken(userDetails);
-
-        // Return response
-        return ResponseEntity.ok(
-                new LoginResponse(
-                        "Login successful",
-                        user.getUsername(),
-                        token
-                )
-        );
     }
 }

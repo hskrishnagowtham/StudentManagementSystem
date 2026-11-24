@@ -1,4 +1,7 @@
+
 package com.krishna.config;
+
+import com.krishna.security.JwtAuthenticationFilter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -6,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -16,20 +20,23 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http) throws Exception {
 
         http
-                // Disable CSRF
                 .csrf(csrf -> csrf.disable())
 
-                // Enable CORS
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
-                // Stateless application
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
@@ -38,19 +45,12 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Allow CORS preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
 
-                        // Allow authentication
                         .requestMatchers("/auth/**")
                         .permitAll()
 
-                        // Allow ALL student APIs temporarily
-                        .requestMatchers("/students/**")
-                        .permitAll()
-
-                        // Allow frontend
                         .requestMatchers(
                                 "/",
                                 "/index.html",
@@ -63,7 +63,6 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // Allow Swagger
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -71,58 +70,58 @@ public class SecurityConfig {
                         )
                         .permitAll()
 
-                        // TEMPORARY:
-                        // allow everything
+                        // Student management APIs: Admin only for now
+
+
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/students/my-profile").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/students/**")
+                        .hasAnyRole("USER", "ADMIN")
+
+                        .requestMatchers("/students/**")
+                        .hasRole("ADMIN")
+
+                        // All remaining endpoints require login
                         .anyRequest()
-                        .permitAll()
+                        .authenticated()
+                )
+
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();
     }
 
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration =
-                new CorsConfiguration();
+        CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(
-                List.of(
-                        "http://localhost:5173",
-                        "https://student-management-frontend-5nti.onrender.com",
-                        "https://studentmanagementsystem-0xvp.onrender.com"
-                )
-        );
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "https://student-management-frontend-5nti.onrender.com",
+                "https://studentmanagementsystem-0xvp.onrender.com"
+        ));
 
-        configuration.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "DELETE",
-                        "OPTIONS"
-                )
-        );
+        configuration.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS"
+        ));
 
-        configuration.setAllowedHeaders(
-                List.of(
-                        "Authorization",
-                        "Content-Type",
-                        "Accept"
-                )
-        );
+        configuration.setAllowedHeaders(List.of(
+                "Authorization", "Content-Type", "Accept"
+        ));
 
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration(
-                "/**",
-                configuration
-        );
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
+
+
 }

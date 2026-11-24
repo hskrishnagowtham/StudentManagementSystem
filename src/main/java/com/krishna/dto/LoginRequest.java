@@ -1,6 +1,7 @@
 package com.krishna.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class LoginRequest {
 
@@ -8,6 +9,7 @@ public class LoginRequest {
     private String username;
 
     @NotBlank(message = "Password cannot be empty")
+    @Size(min = 8, message = "Password must contain at least 8 characters")
     private String password;
 
     public LoginRequest() {
