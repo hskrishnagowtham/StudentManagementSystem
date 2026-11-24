@@ -58,6 +58,9 @@ public class AuthController {
 
             User user = userService.findByUsername(request.getUsername());
 
+            System.out.println("LOGIN DEBUG - username: " + user.getUsername()
+                    + ", role: " + user.getRole());
+
             if (user == null) {
                 return ResponseEntity.status(401).body(
                         new LoginResponse(
