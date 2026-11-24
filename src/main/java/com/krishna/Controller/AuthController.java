@@ -54,50 +54,59 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request) {
-        {
 
-            User user = userService.findByUsername(request.getUsername());
+        User user = userService.findByUsername(request.getUsername());
 
-            System.out.println("LOGIN DEBUG - username: " + user.getUsername()
-                    + ", role: " + user.getRole());
-
-            if (user == null) {
-                return ResponseEntity.status(401).body(
-                        new LoginResponse(
-                                "Invalid username or password",
-                                null, null, null
-                        )
-                );
-            }
-
-            if (!passwordEncoder.matches(
-                    request.getPassword(), user.getPassword())) {
-
-                return ResponseEntity.status(401).body(
-                        new LoginResponse(
-                                "Invalid username or password",
-                                null, null, null
-                        )
-                );
-            }
-
-            UserDetails userDetails =
-                    org.springframework.security.core.userdetails.User
-                            .withUsername(user.getUsername())
-                            .password(user.getPassword())
-                            .roles(user.getRole())
-                            .build();
-
-            String token = jwtService.generateToken(userDetails);
-
-            return ResponseEntity.ok(
+        // Check whether user exists
+        if (user == null) {
+            return ResponseEntity.status(401).body(
                     new LoginResponse(
-                            "Login successful",
-                            user.getUsername(),
-                            token,
-                            user.getRole()
+                            "Invalid username or password",
+                            null,
+                            null,
+                            null
                     )
             );
         }
+
+        System.out.println("LOGIN DEBUG - username: "
+                + user.getUsername()
+                + ", role: " + user.getRole());
+
+        // Check password
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
+            return ResponseEntity.status(401).body(
+                    new LoginResponse(
+                            "Invalid username or password",
+                            null,
+                            null,
+                            null
+                    )
+            );
+        }
+
+        // Create authenticated user details
+        UserDetails userDetails =
+                org.springframework.security.core.userdetails.User
+                        .withUsername(user.getUsername())
+                        .password(user.getPassword())
+                        .roles(user.getRole())
+                        .build();
+
+        // Generate JWT token
+        String token = jwtService.generateToken(userDetails);
+
+        // Return login response
+        return ResponseEntity.ok(
+                new LoginResponse(
+                        "Login successful",
+                        user.getUsername(),
+                        token,
+                        user.getRole()
+                )
+        );
     }
 }
