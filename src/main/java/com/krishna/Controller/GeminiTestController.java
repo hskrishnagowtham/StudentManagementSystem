@@ -1,5 +1,5 @@
 
-package com.krishna.controller;
+package com.krishna.Controller;
 
 import com.krishna.service.GeminiService;
 import org.springframework.web.bind.annotation.*;
