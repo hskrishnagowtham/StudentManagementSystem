@@ -1,4 +1,3 @@
-
 package com.krishna.service;
 
 import com.krishna.dto.RegisterRequest;
@@ -53,6 +52,13 @@ public class RegistrationService {
         student.setYear(request.getYear());
         student.setSemester(request.getSemester());
         student.setCourse(request.getCourse());
+
+        // Initialize marks for a newly registered student
+        student.setTotalMarks(0);
+        student.setMaximumMarks(100);
+        student.setPercentage(0.0);
+        student.setGrade("F");
+
         student.setUser(user);
 
         studentRepository.save(student);
