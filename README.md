@@ -1,182 +1,144 @@
 # Student Management System
 
+A Java Full Stack web application built using Spring Boot, React, and MySQL to manage student records, academic performance, and AI-powered learning assistance.
 
+## Live Demo
 
-A Java Spring Boot based Student Management System with REST APIs and MySQL.
-
-
+- **Frontend:** https://student-management-frontend-5nti.onrender.com/
+- **Backend:** https://studentmanagementsystem-0xvp.onrender.com/
 
 ## About the Project
 
+The Student Management System is designed to simplify student information management and provide academic support through Artificial Intelligence.
 
-
-This project is developed using Java and Spring Boot to manage student information.
-
-
-
-The application provides REST APIs for student management operations and uses MySQL as the database.
-
-
+The application supports separate Admin and Student roles, secure authentication, student record management, academic performance analysis, and AI-powered learning features.
 
 ## Technologies Used
 
-
-
-- Java
-
+### Backend
+- Java 24
 - Spring Boot
-
 - Spring Data JPA
-
 - Hibernate
-
-- MySQL
-
+- Spring Security
+- JWT Authentication
+- Maven
 - REST APIs
 
-- Maven
+### Frontend
+- React
+- JavaScript
+- HTML
+- CSS
+- React Router
 
-- Spring Security
+### Database
+- MySQL
+- Aiven Cloud
 
-- JWT
+### AI Integration
+- Generative AI
+- Large Language Models (LLMs)
+- Groq API
+- Spring AI / OpenAI-compatible API integration
 
+### Tools
+- IntelliJ IDEA
+- Postman
 - Git
-
 - GitHub
-
-
+- Render
 
 ## Features
 
-
-
-- Add student
-
-- View all students
-
-- View student by roll number
-
-- Update student details
-
-- Delete student
-
-- Search students by name
-
-- User registration
-
-- User login
-
+### Authentication and Authorization
+- User registration and login
 - JWT-based authentication
+- Separate Admin and Student roles
+- Role-based access control
 
-- Input validation
+### Student Management
+- Add student records
+- View all students
+- View student by roll number
+- Update student details
+- Delete student records
+- Search students by name
+- Link student login accounts with student records
+- View individual student profiles
 
-- MySQL database integration
+### AI-Powered Features
+- **AI Student Assistant:** Provides academic assistance.
+- **Performance Analysis:** Analyzes student academic performance.
+- **Question Generator:** Generates educational questions.
+- **Learning Recommendations:** Provides learning suggestions.
 
-
+### Academic Management
+- Manage student marks
+- Calculate percentages
+- Assign grades
+- View academic performance
 
 ## API Endpoints
 
-
-
 ### Authentication
 
-
-
-POST /auth/register
-
-
-
-POST /auth/login
-
-
+| Method | Endpoint |
+|---|---|
+| POST | `/auth/register` |
+| POST | `/auth/login` |
 
 ### Students
 
-
-
-POST /students
-
-
-
-GET /students
-
-
-
-GET /students/{rollNumber}
-
-
-
-GET /students/search?name={name}
-
-
-
-PUT /students/{rollNumber}
-
-
-
-DELETE /students/{rollNumber}
-
-
+| Method | Endpoint |
+|---|---|
+| POST | `/students` |
+| GET | `/students` |
+| GET | `/students/{rollNumber}` |
+| GET | `/students/search?name={name}` |
+| PUT | `/students/{rollNumber}` |
+| DELETE | `/students/{rollNumber}` |
+| GET | `/students/my-profile` |
+| PUT | `/students/{rollNumber}/link-account?username={username}` |
 
 ## Database
 
+The application uses MySQL for storing student and user information.
 
+- Local development uses a locally configured MySQL database.
+- Production uses an Aiven MySQL database.
+- Database credentials and API keys should be configured through environment variables and must not be committed to GitHub.
 
-The application uses MySQL.
+## Deployment
 
+- **Frontend:** Render
+- **Backend:** Render
+- **Database:** Aiven MySQL
 
+## How to Run Locally
 
-The local database configuration is kept in `application.properties` and is not committed to GitHub.
-
-
-
-## How to Run
-
-
-
-1. Clone the repository.
-
-
-
+1. Clone the backend repository.
 2. Open the project in IntelliJ IDEA.
-
-
-
 3. Configure your local MySQL database.
+4. Update `application.properties` with your local database configuration.
+5. Configure the required environment variables, including your Groq API key and JWT secret.
+6. Run the Spring Boot application.
 
+The backend runs at:
 
+`http://localhost:10000`
 
-4. Configure `application.properties` with your local database details.
+For the frontend, clone the frontend repository, install its dependencies using `npm install`, configure the backend API URL, and start the React development server.
 
+## GitHub Repositories
 
-
-5. Run the Spring Boot application.
-
-
-
-The backend runs on:
-
-
-
-http://localhost:8080
-
-
+- **Backend:** https://github.com/hskrishnagowtham/StudentManagementSystem
+- **Frontend:** https://github.com/hskrishnagowtham/student-management-frontend
 
 ## Author
 
-
-
 **Krishna Gowtham**
 
+B.Tech – Computer Science and Engineering
 
-
-B.Tech Computer Science Engineering Student
-
-
-
-GitHub:
-
-
-
-https://github.com/hskrishnagowtham
-
+Interested in Java Full Stack Development and Artificial Intelligence.
