@@ -7,6 +7,7 @@ import com.krishna.service.StudentService;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class StudentController {
             @Valid @RequestBody StudentRequest request) {
 
         StudentResponse response = studentService.addStudent(request);
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // GET ALL STUDENTS - ADMIN ONLY
@@ -60,6 +61,19 @@ public class StudentController {
         return ResponseEntity.ok(
                 studentService.getStudentById(rollNumber)
         );
+    }
+
+    // LINK STUDENT LOGIN ACCOUNT - ADMIN ONLY
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{rollNumber}/link-account")
+    public ResponseEntity<StudentResponse> linkStudentAccount(
+            @PathVariable int rollNumber,
+            @RequestParam String username) {
+
+        StudentResponse response =
+                studentService.linkStudentAccount(rollNumber, username);
+
+        return ResponseEntity.ok(response);
     }
 
     // UPDATE STUDENT - ADMIN ONLY

@@ -4,9 +4,11 @@ package com.krishna.service;
 import com.krishna.dto.StudentRequest;
 import com.krishna.dto.StudentResponse;
 import com.krishna.entity.Student;
+import com.krishna.entity.User;
 import com.krishna.exception.StudentAlreadyExistsException;
 import com.krishna.exception.StudentNotFoundException;
 import com.krishna.repository.StudentRepository;
+import com.krishna.repository.UserRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +24,14 @@ public class StudentService {
             LoggerFactory.getLogger(StudentService.class);
 
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
 
-    public StudentService(StudentRepository studentRepository) {
+    public StudentService(
+            StudentRepository studentRepository,
+            UserRepository userRepository) {
+
         this.studentRepository = studentRepository;
+        this.userRepository = userRepository;
     }
 
     // CREATE STUDENT
@@ -67,6 +74,44 @@ public class StudentService {
 
         logger.info("Student created successfully: {}",
                 savedStudent.getRollNumber());
+
+        return convertToResponse(savedStudent);
+    }
+
+    // LINK STUDENT ACCOUNT
+    @Transactional
+    public StudentResponse linkStudentAccount(
+            int rollNumber, String username) {
+
+        Student student = studentRepository.findById(rollNumber)
+                .orElseThrow(() ->
+                        new StudentNotFoundException(rollNumber));
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new RuntimeException("User account not found"));
+
+        if (!"USER".equals(user.getRole())) {
+            throw new RuntimeException(
+                    "Only student accounts can be linked");
+        }
+
+        if (studentRepository.existsByUser_Id(user.getId())) {
+            throw new RuntimeException(
+                    "This user is already linked to a student");
+        }
+
+        if (student.getUser() != null) {
+            throw new RuntimeException(
+                    "This student already has a linked account");
+        }
+
+        student.setUser(user);
+
+        Student savedStudent = studentRepository.save(student);
+
+        logger.info("Account {} linked to student roll number {}",
+                username, rollNumber);
 
         return convertToResponse(savedStudent);
     }
@@ -118,8 +163,7 @@ public class StudentService {
 
         Student student = studentRepository.findById(rollNumber)
                 .orElseThrow(() ->
-                        new StudentNotFoundException(rollNumber)
-                );
+                        new StudentNotFoundException(rollNumber));
 
         return convertToResponse(student);
     }
@@ -133,8 +177,7 @@ public class StudentService {
 
         Student student = studentRepository.findById(rollNumber)
                 .orElseThrow(() ->
-                        new StudentNotFoundException(rollNumber)
-                );
+                        new StudentNotFoundException(rollNumber));
 
         validateMarks(request);
 
@@ -181,20 +224,17 @@ public class StudentService {
 
         if (request.getMaximumMarks() <= 0) {
             throw new IllegalArgumentException(
-                    "Maximum marks must be greater than zero"
-            );
+                    "Maximum marks must be greater than zero");
         }
 
         if (request.getTotalMarks() < 0) {
             throw new IllegalArgumentException(
-                    "Total marks cannot be negative"
-            );
+                    "Total marks cannot be negative");
         }
 
         if (request.getTotalMarks() > request.getMaximumMarks()) {
             throw new IllegalArgumentException(
-                    "Total marks cannot exceed maximum marks"
-            );
+                    "Total marks cannot exceed maximum marks");
         }
     }
 
