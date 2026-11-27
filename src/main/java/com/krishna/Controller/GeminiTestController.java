@@ -2,6 +2,7 @@
 package com.krishna.Controller;
 
 import com.krishna.service.GeminiService;
+import com.krishna.repository.StudentRepository;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -9,9 +10,13 @@ import org.springframework.web.bind.annotation.*;
 public class GeminiTestController {
 
     private final GeminiService geminiService;
+    private final StudentRepository studentRepository;
 
-    public GeminiTestController(GeminiService geminiService) {
+    public GeminiTestController(
+            GeminiService geminiService,
+            StudentRepository studentRepository) {
         this.geminiService = geminiService;
+        this.studentRepository = studentRepository;
     }
 
     @PostMapping("/test")
@@ -21,15 +26,7 @@ public class GeminiTestController {
 
     @PostMapping("/student-assistant")
     public String studentAssistant(@RequestBody GeminiRequest request) {
-
-        System.out.println("AI CONTROLLER REACHED");
-        System.out.println("Question: " + request.prompt());
-
-        String response = geminiService.askStudentAssistant(request.prompt());
-
-        System.out.println("GEMINI RESPONSE RECEIVED");
-
-        return response;
+        return geminiService.askStudentAssistant(request.prompt());
     }
 
     public record GeminiRequest(String prompt) {
